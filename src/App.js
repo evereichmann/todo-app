@@ -1,26 +1,55 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+//import './App.css';
+import Form from './component/Form'
+import ToDoList from './component/ToDoList'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {  
+  state = { 
+    toDo: []
+   }
+
+  componentDidMount() {
+    fetch('http://localhost:3000/todos')
+      .then(resp => resp.json())
+      .then(data => {
+        this.setState({ toDo: data });
+      })
+  }
+
+makeANewToDo = (newToDo) => {
+  fetch('http://localhost:3000/todos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      todo: newToDo
+    })
+  })
+    .then(resp => resp.json())
+    .then(data => {
+      this.setState({ toDo: [...this.state.toDo, data] });
+    })
+  
 }
 
+completeToDo = (id) => {
+fetch('http://localhost:3000/todos/'+id, { method: "DELETE"})
+  .then(resp => resp.json())
+  .then(data => {
+    this.componentDidMount()
+  })
+}
+
+
+  render() { 
+    return ( 
+      <div className="App">
+      <Form makeANewToDo={this.makeANewToDo}/>
+      <ToDoList toDo={this.state.toDo} completeToDo={this.completeToDo}/>
+    </div>
+     );
+  }
+}
+ 
 export default App;
